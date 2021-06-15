@@ -6,12 +6,16 @@ class Abstruct
     protected $result;
     protected $errors;
     protected $isError;
+    protected $query;
+    protected $params;
 
     // private static $table = "user";
 
     function __construct()
     {
         $this->isError = false;
+        $this->query = "";
+        $this->params = [];
         try {
             $this->cnx = new PDO($this->dsn(DB_NAME, DB_HOST), DB_USER, DB_PASS);
         } catch (PDOException $exception) {
@@ -24,6 +28,11 @@ class Abstruct
     function __get($var)
     {
         return $this->$var;
+    }
+
+    public static function init()
+    {
+        return new static();
     }
 
     private function dsn($dbname, $dbhost)
@@ -54,14 +63,14 @@ class Abstruct
 
         $buildQuery = $this->buildQuery($data);
 
-        $qruey = "INSERT INTO " . static::$table . "("
+        $query = "INSERT INTO " . static::$table . "("
             . implode(",", $buildQuery["cols"])
             . ") VALUES("
             . implode(",", $buildQuery["rows"])
             . ")";
 
         return [
-            "qruey" => $qruey,
+            "query" => $query,
             "values" => $buildQuery["vals"]
         ];
     }
@@ -71,39 +80,39 @@ class Abstruct
 
         $buildQuery = $this->buildQuery($data);
 
-        $qruey = "UPDATE " . static::$table . " SET "
+        $query = "UPDATE " . static::$table . " SET "
             . implode("=?, ", $buildQuery["cols"])
-            . "=? WHERE $where";
+            . "=?$where";
 
         return [
-            "qruey" => $qruey,
+            "query" => $query,
             "values" => $buildQuery["vals"]
         ];
     }
 
     protected function deleteQuery($where)
     {
-        return "DELETE FROM " . static::$table . " WHERE $where";
+        return "DELETE FROM " . static::$table . $where;
     }
 
-    protected function selectQuery(array $select, string $where)
+    protected function selectQuery(array $select)
     {
-        $qruey = "SELECT " . implode(", ", $select) . " FROM " . static::$table . " WHERE $where";
+        $query = "SELECT " . implode(", ", $select) . " FROM " . static::$table;
 
-        return $qruey;
+        return $query;
     }
 
     function whereQuery($where)
     {
         extract($this->buildQuery($where));
-        $qruey_string = "";
+        $query_string = "";
         foreach ($cols as $key => $value) {
-            $qruey_string .= $value . "=?,";
+            $query_string .= $value . "=?,";
         }
 
-        $qruey_string = rtrim($qruey_string, ",");
+        $query_string = rtrim($query_string, ",");
         return [
-            "qruey_string" => $qruey_string,
+            "query_string" => " WHERE " . $query_string,
             "values" => $vals
         ];
     }
@@ -113,55 +122,69 @@ class Abstruct
         $insert = $this->inserQuery($data);
         extract($insert);
 
-        $result =  $this->cnx->prepare($qruey);
-        $result->execute($values);
+        $this->query = $query;
+        $this->params = $values;
 
-        $this->errors =  $result->errorInfo();
+        return $this;
     }
 
     public function update($data, $where)
     {
         $where = $this->whereQuery($where);
-        $update = $this->updateQuery($data, $where["qruey_string"]);
+        $update = $this->updateQuery($data, $where["query_string"]);
         extract($update);
 
-        $result =  $this->cnx->prepare($qruey);
-        $result->execute(array_merge($values, $where["values"]));
+        $this->query = $query;
+        $this->params = array_merge($values, $where["values"]);
 
-        $this->errors =  $result->errorInfo();
+        return $this;
     }
 
     public function delete($where)
     {
-        $result =  $this->cnx->prepare($this->deleteQuery($where));
-        $result->execute();
+        $where = $this->whereQuery($where);
 
-        $this->errors =  $result->errorInfo();
+        $this->query = $this->deleteQuery($where["query_string"]);
+        $this->params = $where["values"];
+
+        return $this;
     }
 
-    public function select(array $select, $where, $fetchConstant = PDO::FETCH_ASSOC)
+    public function select(array $select)
     {
-        if (gettype($where) === "string") {
-            $result =  $this->cnx->prepare($this->selectQuery($select, $where));
-            $result->execute();
-        } else if (gettype($where) === "array") {
-            extract($this->whereQuery($where));
-            $result =  $this->cnx->prepare($this->selectQuery($select, $qruey_string));
-            $result->execute($values);
-        }
+        $this->query =  $this->selectQuery($select);
 
-
-        $this->result = $result->fetchAll($fetchConstant);
-
-        $this->errors =  $result->errorInfo();
+        return $this;
     }
 
-    public function query($qruey, $params = [], $fetchConstant = PDO::FETCH_ASSOC)
+    public function where($where)
     {
-        $result = $this->cnx->prepare($qruey);
-        $result->execute($params);
+        extract($this->whereQuery($where));
+        $this->query .= $query_string;
+        $this->params = $values;
+
+        return $this;
+    }
+
+    public function query($query, $params = [], $fetchConstant = PDO::FETCH_ASSOC)
+    {
+        $this->query = $query;
+        $this->execute($params);
         $this->result = $result->fetchAll($fetchConstant);
         $this->errors =  $result->errorInfo();
+
+        return $this;
+    }
+
+    public function execute()
+    {
+        $result = $this->cnx->prepare($this->query);
+        $result->execute($this->params);
+
+        $this->result = $result;
+        $this->errors =  $result->errorInfo();
+
+        return $this;
     }
 
     public function getLastInsertId()
