@@ -7,28 +7,28 @@ $params  = explode("/", ltrim($_SERVER["REQUEST_URI"], "/"));
 
 require_once "globals.php";
 
-if (!isset($params[0]) || $params[0] === "") {
-    $ctr = "home";
-} else {
-    $ctr = $params[0];
-}
-
-
-if (!isset($params[1]) || $params[1] === "") {
-    $action = "index";
-} else {
-    $action = $params[1];
-}
-// var_dump([
-//     "controller" => $ctr,
-//     "action" => $action
-// ]);
-
-$ctr = ucfirst($ctr);
-
 function router($folder = "")
 {
     global $ctr, $action, $params;
+
+    if ($folder === "api") {
+        array_shift($params);
+    }
+
+    if (!isset($params[0]) || $params[0] === "") {
+        $ctr = "home";
+    } else {
+        $ctr = $params[0];
+    }
+
+
+    if (!isset($params[1]) || $params[1] === "") {
+        $action = "index";
+    } else {
+        $action = $params[1];
+    }
+
+    $ctr = ucfirst($ctr);
     $file = BASE_PATH . $folder . "/controllers/" . $ctr . ".controller.php";
     if (file_exists($file)) {
         require_once $file;
