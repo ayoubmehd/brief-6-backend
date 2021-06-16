@@ -6,7 +6,6 @@ abstract class AbstructController
 
     use Http;
 
-
     // User info
     protected function userid()
     {

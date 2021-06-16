@@ -8,6 +8,7 @@ class Abstruct
     protected $isError;
     protected $query;
     protected $params;
+    protected $fetchConstant;
 
     // private static $table = "user";
 
@@ -16,6 +17,7 @@ class Abstruct
         $this->isError = false;
         $this->query = "";
         $this->params = [];
+        $this->fetchConstant = PDO::FETCH_ASSOC;
         try {
             $this->cnx = new PDO($this->dsn(DB_NAME, DB_HOST), DB_USER, DB_PASS);
         } catch (PDOException $exception) {
@@ -150,7 +152,7 @@ class Abstruct
         return $this;
     }
 
-    public function select(array $select)
+    public function select(array $select = ["*"])
     {
         $this->query =  $this->selectQuery($select);
 
@@ -181,7 +183,7 @@ class Abstruct
         $result = $this->cnx->prepare($this->query);
         $result->execute($this->params);
 
-        $this->result = $result;
+        $this->result = $result->fetchAll($this->fetchConstant);
         $this->errors =  $result->errorInfo();
 
         return $this;
