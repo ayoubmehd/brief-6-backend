@@ -37,7 +37,10 @@ function router($folder = "")
             $app = new $ctrClass();
         }
         if (method_exists($app, $action)) {
-            return $app->$action(...array_slice($params, 2, sizeof($params) - 1));
+            return [
+                "app" => $app,
+                "action" => $app->$action(...array_slice($params, 2, sizeof($params) - 1))
+            ];
         }
     }
 }
