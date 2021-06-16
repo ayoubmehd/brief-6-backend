@@ -2,5 +2,5 @@
 
 class RendezVous extends Abstruct
 {
-    protected static $table = "rendez-vous";
+    protected static $table = "`rendez-vous`";
 }
