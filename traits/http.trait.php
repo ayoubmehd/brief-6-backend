@@ -35,4 +35,9 @@ trait Http
 
         return $body->$prop;
     }
+
+    public function set_header($name, $value)
+    {
+        header($name . ":" . $value);
+    }
 }
