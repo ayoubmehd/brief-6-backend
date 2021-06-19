@@ -46,7 +46,7 @@ class RendezvousController extends AbstructController
         $dtime = DateTime::createFromFormat("m-d-Y", $this->request("date"));
         return [
             "date" => $dtime->format("Y-m-d"),
-            "type_de_consultation" => $this->request("type_de_consultation"),
+            "text" => $this->request("text"),
             "horaire" => $this->request("horaire"),
             "ref_user" => $this->request("ref_user")
         ];
