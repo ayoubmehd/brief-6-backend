@@ -19,7 +19,6 @@ class UserController extends AbstructController
             return $query->result[0];
         }
 
-        http_response_code(404);
         return ["error" => "Not Found"];
     }
 
