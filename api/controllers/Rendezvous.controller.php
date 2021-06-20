@@ -15,9 +15,7 @@ class RendezvousController extends AbstructController
             return ["error" => "Not Allowed"];
         }
 
-
         RendezVous::init()->insert($this->handle_data())->execute();
-
         http_response_code(201);
         return ["success" => "RenderVous created successfully"];
     }
@@ -47,7 +45,8 @@ class RendezvousController extends AbstructController
         return [
             "date" => $dtime->format("Y-m-d"),
             "text" => $this->request("text"),
-            "horaire" => $this->request("horaire")
+            "horaire" => $this->request("horaire"),
+            "ref_user" => $this->request("ref_user")
         ];
     }
 }
