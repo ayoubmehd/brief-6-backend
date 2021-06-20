@@ -23,6 +23,10 @@ trait Http
     {
         return $this->requestMethod() === "PUT";
     }
+    public function isPatch()
+    {
+        return $this->requestMethod() === "PATCH";
+    }
     public function isDelete()
     {
         return $this->requestMethod() === "DELETE";

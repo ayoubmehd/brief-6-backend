@@ -47,8 +47,7 @@ class RendezvousController extends AbstructController
         return [
             "date" => $dtime->format("Y-m-d"),
             "text" => $this->request("text"),
-            "horaire" => $this->request("horaire"),
-            "ref_user" => $this->request("ref_user")
+            "horaire" => $this->request("horaire")
         ];
     }
 }
