@@ -2,13 +2,14 @@
 
 class RendezvousController extends AbstructController
 {
-    public function index()
+    public function index($ref)
     {
         if (!$this->isGet()) return;
-        return RendezVous::init()->select()->execute()->result;
+        return RendezVous::init()->select(["id", "date", "text", "horaire"])
+            ->where(["ref_user" => $ref])->execute()->result;
     }
 
-    public function create()
+    public function create($ref)
     {
         if (!$this->isPost()) return;
 
