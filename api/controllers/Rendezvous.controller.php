@@ -2,19 +2,16 @@
 
 class RendezvousController extends AbstructController
 {
-    public function index()
+    public function index($ref)
     {
         if (!$this->isGet()) return;
-        return RendezVous::init()->select()->execute()->result;
+        return RendezVous::init()->select(["id", "date", "text", "horaire"])
+            ->where(["ref_user" => $ref])->execute()->result;
     }
 
-    public function create()
+    public function create($ref)
     {
-        if (!$this->isPost()) {
-            http_response_code(405);
-            return ["error" => "Not Allowed"];
-        }
-
+        if (!$this->isPost()) return;
 
         RendezVous::init()->insert($this->handle_data())->execute();
 
@@ -43,7 +40,8 @@ class RendezvousController extends AbstructController
 
     private function handle_data()
     {
-        $dtime = DateTime::createFromFormat("m-d-Y", $this->request("date"));
+        $dtime = DateTime::createFromFormat("Y-m-d", $this->request("date"));
+
         return [
             "date" => $dtime->format("Y-m-d"),
             "text" => $this->request("text"),
