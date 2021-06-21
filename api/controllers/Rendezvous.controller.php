@@ -10,12 +10,10 @@ class RendezvousController extends AbstructController
 
     public function create()
     {
-        if (!$this->isPost()) {
-            http_response_code(405);
-            return ["error" => "Not Allowed"];
-        }
+        if (!$this->isPost()) return;
 
         RendezVous::init()->insert($this->handle_data())->execute();
+
         http_response_code(201);
         return ["success" => "RenderVous created successfully"];
     }
@@ -41,7 +39,8 @@ class RendezvousController extends AbstructController
 
     private function handle_data()
     {
-        $dtime = DateTime::createFromFormat("m-d-Y", $this->request("date"));
+        $dtime = DateTime::createFromFormat("Y-m-d", $this->request("date"));
+
         return [
             "date" => $dtime->format("Y-m-d"),
             "text" => $this->request("text"),
