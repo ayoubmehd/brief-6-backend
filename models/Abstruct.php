@@ -168,16 +168,23 @@ class Abstruct
         return $this;
     }
 
-    public function in($statement)
+    public function in($column, $statement)
     {
-        $this->query .= "($statement)";
+        $this->query .= "AND `$column` IN ($statement)";
 
         return $this;
     }
 
     public function group_by($column)
     {
-        $this->query .= "GROUP BY  `$column`";
+        $this->query .= " GROUP BY `$column`";
+
+        return $this;
+    }
+
+    public function set_fetch_constant($value)
+    {
+        $this->fetch_constant = $value;
 
         return $this;
     }
