@@ -168,6 +168,27 @@ class Abstruct
         return $this;
     }
 
+    public function in($column, $statement)
+    {
+        $this->query .= "AND `$column` IN ($statement)";
+
+        return $this;
+    }
+
+    public function group_by($column)
+    {
+        $this->query .= " GROUP BY `$column`";
+
+        return $this;
+    }
+
+    public function set_fetch_constant($value)
+    {
+        $this->fetch_constant = $value;
+
+        return $this;
+    }
+
     public function query($query, $params = [], $fetchConstant = PDO::FETCH_ASSOC)
     {
         $this->query = $query;
